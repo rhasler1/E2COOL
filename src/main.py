@@ -23,7 +23,7 @@ def parse_arguments():
     parser.add_argument("--llm", type=str, default="gpt-4o", choices=["gpt-4o", "o1", "deepseek-r1:671b","deepseek-r1:70b", "qwen2.5-coder:32b", "llama3.3", "codellama:70b"], help="llm used for inference")
     parser.add_argument("--self_optimization_step", type=int, default=5, help="number of LLM self-optimization step")
     parser.add_argument("--num_programs", type=int, default=5, help="number of programs from the benchmark to test")
-    parser.add_argument("--use_energy_patterns", type=bool, default=False, help="aid generator LLM with potential energy optimization patterns")
+    parser.add_argument("--use_energy_patterns", type=int, default=0, help="aid generator LLM with potential energy optimization patterns")
 
     args = parser.parse_args()
     return args
@@ -36,6 +36,7 @@ def get_valid_programs(benchmark, num_programs):
     return []
 
 def master_script(benchmark, num_programs, model, self_optimization_step, use_energy_patterns):
+    print(f"{use_energy_patterns}")
     #create LLM agent
     generator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
     evaluator = LLMAgent(api_key=openai_key, model=model, system_message="You are a code expert. Think through the code optimizations strategies possible step by step.")
@@ -56,10 +57,10 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
 
         # select optimization pattern
         if use_energy_patterns:
-            optimiation_patterns = filter_patterns(llm_assistant=pattern_assistant, energy_opt_prompt_path=f"{USER_PREFIX}/src/llm/llm_prompts/energy_opt_prompt.txt", source_code=original_code)
+            optimization_patterns = filter_patterns(llm_assistant=pattern_assistant, energy_opt_prompt_path=f"{USER_PREFIX}/src/llm/llm_prompts/energy_opt_prompt.txt", source_code=original_code)
         else:
-            optimiation_patterns = None
-        #print(f"Testing filter_patterns: {optimization_patterns}") # testing
+            optimization_patterns = None
+        print(f"Testing filter_patterns: {optimization_patterns}") # testing
         
         while True:
             # optimize code
@@ -69,12 +70,12 @@ def master_script(benchmark, num_programs, model, self_optimization_step, use_en
                     compilation_error_message = benchmark_obj.get_compilation_error()
                     last_optimized_code = handle_compilation_error(error_message=compilation_error_message, llm_assistant=generator)
                 else:
-                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_patterns=optimiation_patterns)
+                    last_optimized_code = llm_optimize(code=last_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_patterns=optimization_patterns)
             else:
                 logger.info("re-optimizing from latest working optimization")
                 generator.clear_memory()
                 evaluator_feedback = ""
-                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_patterns=optimiation_patterns)
+                last_optimized_code = llm_optimize(code=last_working_optimized_code, llm_assistant=generator, evaluator_feedback=evaluator_feedback, optimization_patterns=optimization_patterns)
                 reoptimize_lastly_flag = 0
             
             # code post_process
