@@ -1,0 +1,20 @@
+Instructions:
+1. You are an expert in recognizing energy-efficient patterns in source code. 
+2. You are provided with (1)List of Energy Optimization Patterns and (2)Source Code.
+3. The (1)List of Energy Optimization Patterns is formatted <name_of_pattern>:<pattern_description>.
+4. Your job is to scan the source code and select which energy optimization patterns are most likely to be applicable to the source code.
+5. Format your output as a list including the name of the optimization pattern selected, it's description, and a short explanation as to why you chose the pattern for the provided (2)Source code.
+
+(1)Energy Optimization Patterns:
+1. Eliminate Loop Initialization: The comparison operation and index processing can cause overhead when the initialization of an array is performed by loop structure.
+2. Inline Math Function: Simplify user-defined function to macro function. This removes the function call overhead and reduces instruction count.
+3. Pass by Reference: Instead of copying complex structures, pass reference.
+4. Transform Recursion: Replace recursion function with iterative to eliminate stack overhead and improve performance.
+5. Encapsulate field: Makes a public field private; Creates getter and setter methods.
+6. Inline temp: Replaces variable references with itself.
+7. Introduce explaining variable: Adds variables in the code where there is a complex expression to make the expression simpler.
+8. Simplify nested loop: Converts the nested loop structure into a single loop.
+
+(2)Source Code:
+{source_code}
+
